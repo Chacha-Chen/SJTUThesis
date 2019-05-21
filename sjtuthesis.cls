@@ -437,7 +437,7 @@
   \else
     \ifsjtu@bachelor
       \makechinesetitle@bachelor
-      \makeenglishtitle@bachelor
+      \makeenglishtitle
     \else
       \ifsjtu@master
         \makechinesetitle@master
