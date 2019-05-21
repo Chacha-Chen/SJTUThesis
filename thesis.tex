@@ -18,6 +18,113 @@
 % ]
 
 % 逐个导入参考文献数据库
+
+% \usepackage[
+%   separate-uncertainty = true,
+%   multi-part-units = repeat
+% ]{siunitx} 
+
+\usepackage{hyperref}
+
+
+
+\usepackage{url}  %Required
+\usepackage{graphicx}  %Required
+\usepackage{booktabs}
+\usepackage{xspace}
+\usepackage{color}
+% \usepackage{subfig}
+\usepackage{multirow}% http://ctan.org/pkg/multirow
+\usepackage{hhline}% http://ctan.org/pkg/hhline
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{siunitx}
+\usepackage{amsfonts,amsthm,amsmath}
+\usepackage{enumitem}
+% \usepackage[belowskip=-15pt,aboveskip=0pt]{caption}
+\usepackage[skip=2pt]{caption} % example skip set to 2pt
+%\usepackage[belowskip=0pt,aboveskip=0pt]{caption}
+
+% \setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\theoremstyle{definition}
+
+\newtheorem{problem}{Problem}
+
+\newcommand{\nop}[1]{}
+\newcommand{\Todo}{{\textbf{\color{red}{todo-}}}}
+
+% general terms for methods
+\newcommand{\deepQLearning}{Deep Q-Learning\xspace}
+\newcommand{\deepQNetwork}{Deep Q-Network\xspace}
+\newcommand{\dqn}{DQN\xspace}
+
+%notations
+\newcommand{\notationFont}{\mathit}
+\newcommand{\notationVec}{\mathbf}
+
+\newcommand{\agent}{\notationFont{G}}
+\newcommand{\agentVec}{\pmb{G}}
+% \newcommand{\environment}{\notationFont{E}}
+\newcommand{\environmentVec}{\notationVec{E}}
+\newcommand{\user}{\notationFont{u}}
+\newcommand{\action}{\notationFont{a}}
+\newcommand{\actionVec}{\notationVec{a}}
+\newcommand{\staterep}{\notationFont{s}}
+\newcommand{\staterepVec}{\notationVec{S}}
+\newcommand{\obervationrepVec}{\notationVec{O}}
+\newcommand{\reward}{\notationFont{r}}
+\newcommand{\rewardTotal}{\notationFont{R}}
+\newcommand{\queueLength}{\notationFont{L}}
+\newcommand{\numOfVehicles}{\notationFont{N}}
+\newcommand{\distriOfVehicles}{\notationFont{D}}
+\newcommand{\averageWaitingTime}{\notationFont{W}}
+\newcommand{\image}{\notationFont{M}}
+\newcommand{\phase}{\notationFont{p}}
+\newcommand{\pressure}{\notationFont{P}}
+\newcommand{\delay}{\notationFont{V}}
+\newcommand{\switch}{\notationFont{C}}
+\newcommand{\emergencyStop}{\notationFont{O}}
+\newcommand{\numleft}{\notationFont{F}}
+\newcommand{\durationleft}{\notationFont{D^F}}
+\newcommand{\setOfVehicle}{\notationFont{J}}
+\newcommand{\setOfLane}{\notationFont{I}}
+\newcommand{\laneIndex}{\notationFont{i}}
+\newcommand{\vehicleIndex}{\notationFont{j}}
+
+\newcommand{\qnetwork}{\notationFont{Q}}
+\newcommand{\expNotation}{\textsl}
+\newcommand{\WE}{\expNotation{WE}\xspace}
+\newcommand{\EW}{\expNotation{EW}\xspace}
+\newcommand{\NS}{\expNotation{NS}\xspace}
+\newcommand{\SN}{\expNotation{SN}\xspace}
+
+
+\newcommand{\WEs}{\expNotation{WE-Straight}\xspace}
+\newcommand{\WEl}{\expNotation{WE-Left}\xspace}
+\newcommand{\SNs}{\expNotation{SN-Straight}\xspace}
+\newcommand{\SNl}{\expNotation{SN-Left}\xspace}
+
+
+\newcommand{\baselineNotation}{\textsf}
+\newcommand{\FT}{\baselineNotation{FixedTime}\xspace}
+\newcommand{\SOTL}{\baselineNotation{SOTL}\xspace}
+\newcommand{\Greenwave}{\baselineNotation{GreenWave}\xspace}
+\newcommand{\Maxpressure}{\baselineNotation{MaxPressure}\xspace}
+\newcommand{\GWRL}{\baselineNotation{GWRL}\xspace}
+\newcommand{\NIPS}{\baselineNotation{GRL}\xspace}
+\newcommand{\Deeplight}{\baselineNotation{IntelliLight}\xspace}
+% \newcommand{\PressLight}{\expNotation{PressLight-s}\xspace}
+\newcommand{\base}{\baselineNotation{base}\xspace}
+\newcommand{\SDeeplight}{\baselineNotation{base+seg}\xspace}
+\newcommand{\NDeeplight}{\baselineNotation{base+neigh}\xspace}
+\newcommand{\SNDeeplight}{\baselineNotation{base+neigh+seg}\xspace}
+\newcommand{\PressLight}{\baselineNotation{PressLight}\xspace}
+% \newcommand{\PressLight}{\expNotation{CTRL}\xspace}
+
+\newcommand{\HeavyFlat}{{HeavyFlat}}
+\newcommand{\HeavyPeak}{{HeavyPeak}}
+\newcommand{\LightFlat}{{LightFlat}}
+\newcommand{\LightPeak}{{LightPeak}}
+
 \addbibresource{bib/thesis.bib}
 % \addbibresource{bib/chap2.bib}
 
