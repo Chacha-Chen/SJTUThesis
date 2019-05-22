@@ -1,0 +1,59 @@
+% !TEX root = main.tex
+% \chapter{Introduction}
+% \label{chap:intro}
+
+\chapter{Related Work}
+\label{chap:related}
+\textbf{Individual Traffic Signal Control.}
+Individual traffic signal control has been investigated extensively in the field of transportation. These methods try to optimize the travel time or delay of vehicles~\cite{Gart83,Henr84,Boil06,SeHe97,Liang18}, building on the assumption that vehicles are arriving and moving in a specific pattern. Recently, reinforcement learning based methods attempt to address this problem by directly learning from the data~\cite{Wier00,MaDH16}. Earlier work using tabular Q-learning~\cite{APK03,ElAb10} can only deal with discrete state representations. Recent work using deep Q-learning~\cite{liLW16,VaOl16,wei2018intellilight} and policy gradient~\cite{MSCH17,Casa17PG} can cope with more complex continuous state representation, and hence have shown better performance.
+
+\textbf{Conventional Multi-intersection Traffic Signal Control.}
+Conventional multi-intersection control usually requires the intersections to have the same cycle length, coordination can be achieved by setting a fixed offset (i.e., the time interval between the beginnings of green lights) among all intersections~\cite{urbanik2015signal} in grid networks with homogeneous blocks. In fact, it is not an easy task to even provide coordination along an arterial, given traffic of opposite directions usually cannot be facilitated simultaneously. To solve this problem, some optimization-based methods~\cite{robertson1969transyt,little1981maxband} are developed to minimize vehicle travel time and/or the number of stops at multiple intersections. 
+Systems like SCATS and SCOOT also have internal selection or optimization processes to modify cycle length, phase splits and offsets ~\cite{kergaye2010comparative}. Instead of optimizing offsets, max-pressure~\cite{MP13,MP13book} aims to maximize throughput of the network so as to minimizing the travel time. However, these approaches still rely on assumptions to simplify the traffic condition, and do not guarantee optimal results in the real world.
+
+\textbf{RL-based Multi-intersection Traffic Signal Control.}
+Since recent advances in RL improve the performance on isolated traffic signal control~\cite{VaOl16,wei2018intellilight}, efforts have been made to design strategies that control multiple intersections. \textit{One way} is to consider explicit coordination mechanisms between learning agents using coordination graphs\cite{KWBV08,VaOl16}, extending \cite{Wier00} using max-plus algorithm. Since all the above methods need to negotiate between the agents in the whole network, they are computationally expensive. \textit{Another way} is to use individual RL agents to control the traffic signals in the multi-intersection system~\cite{ElAA13,ALUK10,da2006adaptive}. These methods are more scalable, since each agent makes its own decision based on the information from itself and neighboring intersections without explicit coordination. Our proposed method also follows this direction. However, none of the existing studies draw a connection with traditional transportation methods. 
+
+%they only focus on rewards and overlook the adaptability of the algorithms to the real traffic. Therefore, they cannot interpret why the learned light signal changes corresponding to the traffic. In this paper, we try to test the algorithms in different traffic setting, and add more interpretation other than just reward.
+
+\nop{
+Conventional control methods in isolated intersections use closed-form solutions given by optimization of operational parameters based on assumptions and constraints, while reinforcement learning methods have proven useful in this problem as they are able to learn from data collected from sensors in a more intelligent and adaptive way. \Todo-Guanjie, make it shorter
+
+
+\begin{itemize}
+\item Coordinated method
+\item non-Coordinated method
+\item centralized control(searching space)
+\end{itemize}
+
+Isolated traffic signal control has been investigated extensively in the field of transportation. These methods try to optimize the travel time or delay of vehicles~\cite{Gart83,Henr84,Boil06,SeHe97}, building on the assumption that vehicles are arriving and moving in a specific pattern. Recently, reinforcement learning based methods attempt to attack this problem by directly learning from the data~\cite{wiering2000multi,mannion2016experimental}. Earlier work using tabular Q-learning~\cite{APK03,ElAb10} can only deal with discrete state representations. Recent work using deep Q-learning~\cite{li2016traffic,van2016coordinated,wei2018intellilight} and policy gradient~\cite{mousavi_traffic_2017,mousavi_traffic_2017} can cope with more complex continuous state representation, and hence have shown better performance.
+
+However, major challenges lie in the control of multi-intersection scenario, i.e., along an arterial and inside a network. Current methods generally have two categories, centralized methods, and decentralized methods~\cite{SQAS15}. 
+
+
+Centralized methods are implemented either with pre-defined or with traffic-responsive methods, while both of them are not easy to scale.  Pre-defined centralized approaches usually use historical data to calculate splits and cycle times so as to maximize the flow in a specific direction. One of the widely-used pre-defined centralized coordinated methods in transportation engineering is through "Green Wave", i.e., vehicle will see a progressive cascade of green lights, to optimize the travel time of vehicles along an arterial. The problem with fixed coordination is that the solution is based on an aggregated average traffic pattern, and therefore does not necessarily address real-time situations satisfactorily. Traffic responsive centralized systems, on the other hand, use a centralized agent to control all intersections for the sake of coordination. Each intersection is typically controlled by traffic-responsive methods for changing signal phases. For systems like SCATS or SCOOT, the decisions are made after internal selection and optimization inside the control systems, which may not reflect real-world consequences. \todo{ZY will work on this part}Centralized methods work well only with well-defined traffic volume patterns. In cities where these patterns are not clearly separable (e.g., cities where business centers are no longer located exclusively downtown), coordination may not be effective. What's more, when adding new intersections into the system, centralized methods are not easy to scale, since it may require a large number of central updates of control strategies, or even learning from scratch. 
+
+\nop{Isolated traffic responsive systems, on the other hand, use inductive loop sensors to determine if there is a long queue of stopped cars, but this decision is only locally optimal.
+\todo{In both SCATS and SCOOT systems there are coordination between intersections. Maybe say "the decisions are made after internal selection and optimization inside the control systems, which may not reflect real-world consequences"}
+
+In this sense, traffic responsive coordinated control may have a better performance. One type of solution is centralized methods which requires a centralized agent to control all intersections for the sake of coordination. Each intersection is typically controlled by fixed-time plans for changing signal phases, which is largely reply \todo{dependent?} on prior knowledge. For systems like SCATS or SCOOT, the baseline plans of signal settings are predetermined based on engineering experience. This approach works well only in traffic networks with well defined traffic volume patterns\todo{these adaptive methods  do address changes in traffic}. In cities where these patterns are not clearly separable (e.g., cities where business centers are no longer located exclusively downtown), coordination may not be effective. What's more, when adding new intersections into the system, centralized methods are not easy to scale, since it may require a large number of central updates of control strategies, or even learning from scratch. 
+}
+
+In this sense, decentralized methods may be more scalable and practicable. Decentralized methods make use of isolated traffic signal control methods, using the information from both target and surrounding intersections. They are computationally less demanding because they only need and maintain relevant information from surrounding intersections/controllers. By plugging new intersection controllers into the system, the decentralized systems are easy to scale. 
+
+However, decentralized methods assume relatively static traffic environments, and are hence far from the real case. What's more, they only focus on rewards and overlook the adaptability of the algorithms
+to the real traffic. Therefore, they cannot interpret why the learned light signal changes corresponding to the traffic. In this paper, we try to test the algorithms in different traffic settings and add more interpretations other than reward. As far as we know, it is the first time that the policy learned by the reinforcement learning control agents are interpreted using the traditional transportation coordination method on an arterial.
+
+\nop{Multi-intersection traffic light control has attracted a lot of attention in recent years due to its essential role in adjusting traffic. Current methods generally have two categories, centralized methods, and de-centralized methods. 
+
+Centralized methods use a centralized agent to control all intersections for the sake of cooperation. Each intersection is typically controlled by fixed-time plans for changing signal phases, which is largely reply on prior knowledge. For systems like SCATS or SCOOT, the cooperation rules are defined by human experts （based on ）. These rules do not adapt to dynamically changing traffic in real time. 
+
+In general, centralized methods and systems can not scale to large arterials. Traditional centralized systems are usually designed around the larger scale, therefore, adding some controllers requires a large number of central updates of computers and softwares. The operation is relatively complicated and the operator must adjust many parameters. The maintenance of highly skilled and trained operators is expensive.
+
+
+Decentralized systems rely on the control strategies of individual signal. They are computationally less demanding because they only need and maintain relevant information from surrounding intersections/controllers.
+
+By plugging new controllers into the system, distributed systems are scalable and easy to scale.
+
+The establishment and operation of a decentralized system is often inexpensive because there is no need for a reliable and direct communication network between the central computer and the local controller in the field. As a result, inexpensive communication alternatives such as wireless communication networks have created viable options that significantly reduce system cost}
+}
