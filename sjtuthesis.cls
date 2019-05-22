@@ -632,7 +632,7 @@
     {
       \zihao{2}
       \begin{tabular}{r@{：}l}
-        \sjtu@label@title & {\zihao{-2}\parbox[t]{320pt}{\sjtu@value@chinesecovertitle}}
+        \sjtu@label@title & {\zihao{-3}\parbox[t]{320pt}{\sjtu@value@chinesecovertitle}}
       \end{tabular}
     }
     \vskip \stretch{1}
