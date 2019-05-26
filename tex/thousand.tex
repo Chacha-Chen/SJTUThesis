@@ -1,5 +1,112 @@
 \chapter{Toward A Thousand Lights: Decentralized Deep ReinforcementLearning for Large-Scale Traffic Signal Control}
 \label{chap:thousand}
+\section{Overview}
+
+\nop{
+
+\href{https://www.ijcai19.org/call-for-paper-AI-for-improving-human-wellbeing.html}{\color{blue}IJCAI-special track}
+\todo{@GUANJIE}
+\begin{itemize}
+    \item congestion and sustainable communities
+    \item intelligent transportation balabalabala..
+    \item implementation on large scale road net work is super hard
+    \begin{itemize}
+        \item heterogeneous intersections
+        \item computation cost
+        \item model generality
+    \end{itemize}
+\end{itemize}
+
+The main contribution of this work is two-folds:
+\begin{itemize}
+\item proposed a novel decentralized network level control algorithm with a new reward definition, which could be theoretically justified by classical traffic signal control theory (maxpressure)
+
+\item large scale application on more than a thousand lights in real-world network
+\end{itemize}
+}
+
+% {
+% \color{red}
+% Story line
+% \begin{itemize}
+%     \item aim for large-scale network
+%     \item no one has ever done before
+%     \item concise state ; knowledge sharing (?)       
+%     \item state action reward (large-scale)\\        
+%     learn from MP (reward design with provable objective)
+% \end{itemize}}
+
+\nop{Urban traffic congestion has been a major obstacle to sustainable development. Due to the rapid urbanization which results in an explosive increase in household owning cars, traffic congestion, along with health-damaging air pollution, high stress of commuters and economic loss, \hl{now stands at all time high}.}
+
+Due to the rapid urbanization which results in an explosive increase in household owning cars, urban traffic congestion has been a major obstacle to sustainable development. Traffic congestion will not only waste fuels but also increase harmful emission, including greenhouse gases (e.g., carbon dioxide) and other particles (e.g., nitrogen oxides) that may harm human's health~\cite{bharadwaj2017impact}. According to existing studies, transport sector contributes to $23\%$ of total CO2 emission from fuel combustion~\cite{grote2016including}, and road traffic makes up about three fourths of them. Further, for vehicles in urban cities, traffic congestion may increase the emission by $40\%$~\cite{grote2016including}. Therefore, mitigating traffic congestion is extremely urgent. To achieve this, one of the most effective approaches is to control the traffic signal more intelligently. Note that, the urban city is usually densely connected, and the signal control strategies of intersections are highly correlated. Therefore, it is crucial to solve the city-level traffic signal control, rather than a few regions separately (which may just move the congestion to other regions).
+
+
+Traditional transportation approaches for traffic signal control can be categorized into following categories, pre-timed~\cite{koonce2008traffic}, actuated~\cite{cools2013self}, adaptive~\cite{lowrie1990scats,hunt1981scoot} and optimization-based control~\cite{varaiya2013max}. They either rely heavily on assumption of relatively steady traffic or depend on pre-defined rules according to expert knowledge. Hence, they fail to adjust to dynamic traffic nicely. Recently, there have been some promising works in using reinforcement learning (RL) to solve the traffic signal control problem, in isolated intersections~\cite{wei2018intellilight}, or small regions~\cite{ElAb12,van2016coordinated,nishi2018traffic} with up to 59 intersections. However, none of these studies succeed in extending to a city-level scenario, with thousands of intersections.
+
+City-level traffic signal control involves thousands of intersections and can not be solved by a single centralized agent. Take Manhattan, NYC for instance, if one agent is designed to interact with the 2510 intersections, it has to face the state space of $|S|^{2510}$ and action space of $|A|^{2510}$, where $S$ is the state set and $A$ is the action set of one single intersection. In practice, this could take an astronomical number of training samples as well as a huge amount of time to converge. 
+
+A natural way is to deal with the individual intersection signal control and to add coordination upon it. However, two major challenges occur following this line of method. 
+
+First, training thousands of RL agents independently is expensive and time-consuming. The thousands of RL agents, though controlling different traffic flows, are essentially following similar control logic. Their learned knowledge should be shared to enhance the speed of training. How can we design a parameter sharing diagram to do so?
+
+\nop{
+However, training thousands of RL agents independently is expensive and time-consuming. When similar agents are learning similar behaviors, their learned knowledge should be shared to enhance the speed of training and to utilize resource. Homogeneous agents could benefit from other agents' experiences and learned policies by learning in a parameter sharing paradigm~\cite{gupta2017cooperative}. Unlike a small-region or grid road net, a real world road net with thousands of intersections covers heterogeneous types of intersections (i.e., the number of entering approaches and the number of lanes) and traffic signal settings, how should we design a generic model for all the intersections?
+}
+
+% However, considering that a large region may cover heterogeneous types of intersections (i.e., number of entering approaches and number of lanes) and traffic signal settings, how should we design a generic model for all the intersections?
+% Hence, to speed up the training process, knowledge sharing is facilitated among all the agents. 
+% we design and implement a generic model for all the intersections in order to facilitate parameter sharing among all the agents. 
+% However, simply letting each agent learn independently means allowing agents to repeat similar mistakes (i.e., setting bad signal), which causes real traffic congestion. Therefore, a better solution is to enable the knowledge sharing among intersections. 
+% However, considering that a large region may cover heterogeneous types of intersections (i.e., number of entering approaches and number of lanes) and traffic signal settings, how should we design a generic model for all the intersections?
+
+\nop{
+Second, when dealing with multi-intersection traffic signal control, it is hard to assign the region-wise reward function to each intersection. Previous works~\cite{ElAb12,van2016coordinated,nishi2018traffic} usually adopt common transportation measurements as the reward function, e.g., average wait time of vehicles~\cite{nishi2018traffic} and delay~\cite{ElAb12,van2016coordinated}, but there is no guarantee that the overall objective is optimized by letting each agent maximize its own expected reward. How should we design the reward for each individual agent to help them learn the implicit coordination and to optimize towards a global objective? }
+
+Second, when dealing with multi-intersection traffic signal control, it is hard to assign the region-wise reward function to each intersection. Previous works~\cite{nishi2018traffic,ElAb12,van2016coordinated} usually adopt common transportation measurements as the reward function, e.g., average wait time of vehicles~\cite{nishi2018traffic} and delay~\cite{ElAb12,van2016coordinated}, but there is no guarantee that the overall objective is optimized by letting each agent maximize its own expected reward. How should we design the reward for each individual agent to help them learn the implicit coordination and to optimize towards a global objective? 
+
+
+Faced with these challenges, we propose a decentralized reinforcement learning model to tackle the city-level traffic signal control problem. Our model can be generalized to different intersection types and signal settings and can enable knowledge sharing, which will speed up the training process and mitigate congestion in real world. In addition, inspired by traditional transportation theories, we design our reward with theoretical guarantee to maximize the total throughput of the region given max pressure control theory~\cite{varaiya2013max}. In short, our contributions can be summarized as below.
+
+\begin{itemize}
+\item We propose a novel decentralized network level traffic signal control RL algorithm with parameter sharing which enables large scale application. 
+\item We design a new reward function, which can be theoretically proved to maximize the throughput by classical transportation theory. 
+% \item The superior performance of our learned policy could be validated using Macroscopic Fundamental Diagram.
+\item It is the first time that an intelligent traffic control algorithm is  validated in a real-world scenario with thousands of traffic lights.
+% Extensive experiments on real world data are conducted to demonstrate the effectiveness of the algorithm.
+\end{itemize}
+
+\section{Related Work}
+
+
+% Pre-timed control $\rightarrow$ Actuated $\rightarrow$ Adaptive $\rightarrow$ Learning
+% \textbf{1.Learning is better}\\
+% \textbf{2.No one has ever done more than a thousand lights}
+% (MFD parameter control is heuristic)\\
+% \textbf{3.What can we learn from transportion}(draw a connection)\\
+% Maxpressure contorl $\rightarrow$ Macroscopic Theory \\
+% % \begin{itemize}
+% % \item transportation fields
+% % \begin{itemize}
+% % 	\item FT
+% % 	\item Formula
+% % 	\item Actuated control
+
+% % \end{itemize}
+% % \item CS
+% % \begin{itemize}
+% % \item MARLIN-ATSC   59 intersections in downtown Toronto
+% % \item NIPS wiering
+% % \item IntelliLight
+% % \end{itemize}
+
+
+% % \end{itemize}
+% Isolated inersection control $\rightarrow$ region level control
+
+The key challenge for network-level traffic signal control is how to achieve coordination. In the traditional transportation area, the coordination between intersections can be achieved by manually adjusting the offsets (the beginning time of each phase) between adjacent intersections~\cite{Roess2011t,little1981maxband} to optimize for traffic along certain directions, which cannot accommodate the traffic of all directions in the network. Current state-of-the-art network-level traffic signal control method in transportation is by using MaxPressure~\cite{varaiya2013max,maxpressure14}, a decentralized method that has nice provable properties for optimizing the throughput of an individual intersection. 
+
+Recently, RL has shown superior performance over conventional traffic signal control methods in the single intersection scenario~\cite{van2016coordinated,wei2018intellilight}, and efforts have been put to develop coordination strategies using RL for network-level signal control. Coordination strategies like training one RL agent to learn the joint action of all the intersections~\cite{PraB11} or even adjacent intersections~\cite{KWBV08,van2016coordinated} cannot scale to networks with a large number of intersections due to the increase in action space. Other coordination strategies control the traffic signal in a  decentralized way, where each intersection is controlled by one RL agent which adds its neighbor’s traffic condition~\cite{ElAb12,arel2010reinforcement,SBPB+06,EAA13,DrSt06,Wier00,WVVK04-2}  or hidden state~\cite{nishi2018traffic} into their states. Though these decentralized methods claim their methods are scalable to large-scale networks, however, none of the existing studies have conducted experiments on the road networks with more than 100 intersections. In the urban environment, the number of traffic signals within one district can easily exceed one hundred, not to mention a borough like Manhattan, NYC, which contains over 2510 traffic signals. To the best of our knowledge, we are the first to evaluate the RL-based traffic signal control methods in a scale of thousands of traffic signals.
+
 
 \section{Preliminaries}
  
@@ -19,7 +126,7 @@ Each intersection is controlled by an RL agent. At time step $t$, agent $i$ view
 \end{problem}
 
 % !TEX root = main.tex
-\begin{figure}[t!]
+\begin{figure}[]
 \centering
 \includegraphics[width=.46\textwidth]{figures/framework.pdf}
 %\vspace{-2mm}
@@ -49,7 +156,7 @@ In this section, we first introduce the basic elements for reinforcement learnin
 We design the state, the action as well as the reward for the \PressLight agent as follows.
 
 \begin{itemize}
-    \item \textbf{Observation}. Each agent observes part of the system state as its own observation. For a standard intersection with 12 traffic movements, its observation includes the current phase $p$ and the pressure of the 12 traffic movements. Note that for the intersection with fewer than 12 movements, the vector is zero-padded\footnote{In this paper, we only consider no more than 12 traffic movements, but the proposed method can be easily extend to control intersections with more than 12 movements.}.
+    \item \textbf{Observation}. Each agent observes part of the system state as its own observation. For a standard intersection with 12 traffic movements, its observation includes the current phase $p$ and the pressure of the 12 traffic movements. Note that for the intersection with fewer than 12 movements, the vector is zero-padded\footnote{In this chapter, we only consider no more than 12 traffic movements, but the proposed method can be easily extend to control intersections with more than 12 movements.}.
     \item \textbf{Action}. 
          At time $t$, each agent chooses a phase $p$ as its action $a_t$, indicating the traffic signal should be set to phase $p$. 
          As shown in Figure~\ref{fig:phase}, eight phases are used to control the traffic movements in each intersection. For example, when phase \#2 is activated, the vehicles on the left-turn lane on the East and the West are allowed to turn left to their corresponding exiting lanes.
@@ -334,7 +441,7 @@ In this section, we conduct extensive experiments to answer the following questi
 
 
 \subsection{Settings}
-Following the previous work on traffic signal control study~\cite{wei2018intellilight}, we conduct experiments on SUMO (Simulation of Urban MObility)\footnote{https://sourceforge.net/projects/sumo/}. In order to support large-scale reinforcement learning, we implement the multi-thread version of SUMO. After the traffic data being fed into the simulator, a vehicle moves towards its destination according to the setting of the environment. The simulator provides the state to the signal control method and executes the traffic signal actions from the control method. Following the tradition, each green signal is followed by a three-second yellow signal and two-second all red time\footnote{The codes and the public datasets used in this paper are available online: \url{https://www.dropbox.com/sh/tx81ndkiqdpk784/AACfJk7wUu-cFElm7uiuURRda?dl=0}}. 
+Following the previous work on traffic signal control study~\cite{wei2018intellilight}, we conduct experiments on SUMO (Simulation of Urban MObility)\footnote{https://sourceforge.net/projects/sumo/}. In order to support large-scale reinforcement learning, we implement the multi-thread version of SUMO. After the traffic data being fed into the simulator, a vehicle moves towards its destination according to the setting of the environment. The simulator provides the state to the signal control method and executes the traffic signal actions from the control method. Following the tradition, each green signal is followed by a three-second yellow signal and two-second all red time\footnote{The codes and the public datasets used in this chapter are available online: \url{https://www.dropbox.com/sh/tx81ndkiqdpk784/AACfJk7wUu-cFElm7uiuURRda?dl=0}}. 
 
 In a traffic dataset, each vehicle is described as $(o, t, d)$, where $o$ is the origin location, $t$ is  time, and $d$ is the destination location. Locations $o$ and $d$ are both locations on the road network. Traffic data is taken as input for the simulator.
 
@@ -350,8 +457,8 @@ Both synthetic and real-world datasets, which focus on bi-directional and dynami
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.5\textwidth]{figures/road_net.pdf} \vspace{-2mm}
-\caption{$4\times4$ road network.}\vspace{-2mm}
+\includegraphics[width=1.0\textwidth]{figures/road_net.pdf}
+\caption{$4\times4$ road network.}
 \label{fig:net}
 \end{figure}
 
@@ -368,43 +475,17 @@ Both synthetic and real-world datasets, which focus on bi-directional and dynami
 % \end{itemize}
 \item Real-world data. We use real traffic data in Manhattan, New York City. Detailed statistics are shown in Table~\ref{tab:real-table} and the road network of Manhattan is demonstrated in Figure~\ref{fig:road-net}. Note that the manhattan dataset contains signalized 2510 traffic lights.\\
 
-\begin{figure}[t!]
+\begin{figure}[htbp]
   \centering
-        % \begin{subfigure}[t]{.2\textwidth}
-        %  \includegraphics[width=\textwidth]{figures/road_net.pdf}
-        %         \caption{$4\times4$ road network.}
-        %         % \vspace{-.1in}
-        %         \label{fig:manhattan}
-        % \end{subfigure}
-        % \hfill
-        \begin{subfigure}[t]{.2\textwidth}
+        \begin{subfigure}[]{.4\textwidth}
          \includegraphics[width=\textwidth]{figures/IMG_2711.jpg}
                 \caption{Manhattan}
-                % \vspace{-.1in}
-
         \end{subfigure}
-        \hfill
-            \begin{subfigure}[t]{.2\textwidth}
+        % \hfill
+            \begin{subfigure}[]{.4\textwidth}
          \includegraphics[width=\textwidth]{figures/IMG_2712.jpg}
                 \caption{Manhattan in SUMO}
-                % \vspace{-.1in}
         \end{subfigure}
-        %         \begin{subfigure}[t]{0.45\textwidth}
-        %  \includegraphics[width=\textwidth,height=0.13\textheight]{figures/manhattan-rotate.jpg}
-        %         \caption{Manhattan}
-        %         % \vspace{-.1in}
-
-        % \end{subfigure}
-        % \hfill
-        %     \begin{subfigure}[t]{0.45\textwidth}
-        %  \includegraphics[width=\textwidth,height=0.13\textheight]{figures/manhattan-sumo-rotate.jpg}
-        %         \caption{Manhattan in SUMO}
-        %         % \vspace{-.1in}
-        % \end{subfigure}
-%   \subfigure[Config 1]{\label{fig:MFD_700_03} \includegraphics[width=0.3\textwidth]{figures/anon_4_4_700_03_synthetic.png}}
-%   \subfigure[Config 2]{\label{fig:MFD_700_06} \includegraphics[width=0.3\textwidth]{figures/anon_4_4_700_06_synthetic.png}}
-%   \subfigure[Config 3]{\label{fig:MFD_750_03} \includegraphics[width=0.3\textwidth]{figures/anon_4_4_750_03_synthetic.png}}
-%   \subfigure[Config 4]{\label{fig:MFD_750_06} \includegraphics[width=0.3\textwidth]{figures/anon_4_4_750_06_synthetic.png}}
   \caption{Road network of Manhattan in our experiments.}
   \label{fig:road-net}
 \end{figure}
@@ -488,7 +569,7 @@ The advantage of \PressLight over the other transportation and reinforcement lea
 \caption{Performance comparison of different methods evaluated in the four configurations of synthetic traffic data. For average travel time, the lower the better while for throughput, the higher the better.}
 \label{tab:synthetic_performance}
 \begin{tabular}{lcccccccc}
-% {p{0.1\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}|p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
+% {p{0.1\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}|p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.07\textwidth}}
 \toprule
 \multirow{2}[3]{*}{Model}&\multicolumn{4}{c}{Travel Time}&\multicolumn{4}{c}{Throughput}\\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}

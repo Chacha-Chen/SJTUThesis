@@ -100,6 +100,9 @@
 \newcommand{\laneIndex}{\notationFont{i}}
 \newcommand{\vehicleIndex}{\notationFont{j}}
 
+\newcommand{\withoutturn}{\notationFont{T_h}}
+\newcommand{\withturn}{\notationFont{T_u}}
+
 \newcommand{\qnetwork}{\notationFont{Q}}
 \newcommand{\expNotation}{\textsl}
 \newcommand{\WE}{\expNotation{WE}\xspace}
@@ -170,8 +173,8 @@
     \ifsjtu@review\relax
     % exclude the original claim and authorization
     \else
-      \makeDeclareOriginal
-      \makeDeclareAuthorization
+    %   \makeDeclareOriginal
+    %   \makeDeclareAuthorization
     \fi
   \fi
   \frontmatter % 使用罗马数字对前言编号
@@ -188,7 +191,7 @@
   \listofalgorithms
   \addcontentsline{toc}{chapter}{\listalgorithmname}  % 将算法目录加入全文目录
 
-  \include{tex/symbol} % 主要符号、缩略词对照表
+%   \include{tex/symbol} % 主要符号、缩略词对照表
 \fi
 
 \makeatother
@@ -196,17 +199,11 @@
 
 % 正文内容
 \include{tex/intro}
-\include{tex/relatedwork}
-% \input{introduction}
+% \include{tex/relatedwork}
 \input{tex/arterial}
 \input{tex/presslight}
 \input{tex/thousand}
-% \input{tex/experiment}
-% \input{tex/conclusion}
-% \include
-% \include{tex/example}
-% \include{tex/faq}
-% \include{tex/summary}
+
 
 \appendix % 使用英文字母对附录编号
 
@@ -238,7 +235,7 @@
 
   \ifsjtu@bachelor
     % 学士学位论文要求在最后有一个英文大摘要，单独编页码
-    \include{tex/end_english_abstract}
+    % \include{tex/end_english_abstract}
   \else
     % 盲审论文中，发表学术论文及参与科研情况等仅以第几作者注明即可，不要出现作者或他人姓名
     \ifsjtu@review\relax

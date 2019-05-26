@@ -1,6 +1,65 @@
-\chapter{PressLight: Learning Max Pressure Control for SignalizedIntersections in Arterial Network}
+\chapter{PressLight: Learning Max Pressure Control for Signalized Intersections in Arterial Network}
 \label{chap:presslight}
+\section{Overview}
+\label{sec:intro}
 
+
+Traffic signals coordinate the traffic movements at the intersection and a smart traffic signal control algorithm is the key to transportation efficiency. Traffic signal control remains an active research topic because of the high complexity of the problem. The traffic situations are highly dynamic, thus require traffic signal plans to be able to adjust to different situations.
+
+Recently, people start to investigate reinforcement learning (RL) techniques for traffic signal control. Several studies have shown the superior performance of RL techniques over traditional transportation approaches~\cite{Wier00,AbPK03,ALUK10,AbMB13,VaOl16,wei2018intellilight}. The biggest advantage of RL is that it directly learns how to take the next actions by observing the feedback from the environment after previous actions. 
+
+\begin{figure}[]
+\centering
+\begin{tabular}{ccc}
+   \includegraphics[width=0.45\textwidth]{figures/intro_1.png}&
+   \includegraphics[width=0.4\textwidth]{figures/intro_0.png}\\
+   \begin{tabular}[c]{@{}c@{}}(a) Performance w.r.t. reward\end{tabular} &
+   \begin{tabular}[c]{@{}c@{}}(b) Convergence w.r.t. state\end{tabular} \\ 
+   \end{tabular}
+\label{fig:intro}
+\caption{Performance of RL approaches is sensitive to reward and state. (a) A heuristic parameter tuning of reward function could result in different performances. (b) The method with a more complicated state (\LIT~\cite{ZXZF+19} w/ neighbor) has a longer learning time but does not necessarily converge to a better result. }
+\label{fig:intro}
+\vspace{-3mm}
+\end{figure}
+
+One major issue of current RL-based traffic signal control approaches is that the setting is often heuristic and lacks proper theoretical justification from transportation literature. This often results in highly sensitive performance w.r.t. the setting and leads to a long learning process. We elaborate on this issue by examining two fundamental elements in RL setting: reward and state.
+
+First, various reward designs have been proposed in the literature. The reason is that travel time, the ultimate objective, is hard to optimize directly. Travel time is a long-term reward depending on a sequence of actions, thus the effect of one action can hardly be reflected in terms of travel time. People thus choose short-term rewards like queue length or delay to approximate the travel time~\cite{hua19survey}. So the reward function is often defined as a weighted sum of these terms~\cite{VaOl16,BPT14,ElAb10,ElAA13,wei2018intellilight}. However, as shown in Figure~\ref{fig:intro}(a), tuning the weights on these terms could lead to largely different results in terms of travel time. Some literature~\cite{ZZXW+19} discusses how to define the reward by connecting with the existing transportation method, but they only focus on controlling a single intersection. In this chapter, we focus on the multi-intersection control scenario. 
+
+Second, existing RL methods have a trend of using more complicated state representation. Recent studies use visual images to describe the full traffic situation at the intersection~\cite{VaOl16,wei2018intellilight}, which results in the dimension of the state in the scale of thousands. In the single intersection scenario,~\cite{ZZXW+19} reveals that additional information is not always helpful. Similar conclusions can also be found in the multi-intersection scenario. As shown in Figure~\ref{fig:intro}(b), complicated state definitions increase the learning time and may not necessarily bring significant gain. Note that we are not claiming that additional information is always not helpful. The choice of the state depends on the reward setting. Based on the reward design of \LIT~\cite{ZZXW+19}, neighboring information is not necessary in the case we show in Figure~\ref{fig:intro}(b). The question is, could we justify theoretically how much information is enough in state definition in order to optimize the reward function?
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/Maxpressure.pdf}
+    \caption{Illustration of max pressure control in two cases. In Case A, green signal is set in the North$\rightarrow$South direction; in Case B, green signal is set in the East$\rightarrow$West direction.}
+    \label{fig:pressure}
+    \vspace{-2mm}
+\end{figure}
+
+The challenges we face in RL motivate us to look for support from transportation. In transportation literature, max pressure (MP) control is one of the state-of-the-arts in traffic signal control~\cite{MP13-adaptvie,MP13}. The key idea of MP is to minimize the ``pressure'' of an intersection, which can be loosely defined as the number of vehicles on incoming lanes minus the number of vehicles on outgoing lanes. Figure~\ref{fig:pressure} illustrates the concept of pressure. By setting the objective as minimizing the pressure of intersections, MP is proved to maximize the throughput of the whole road network\footnote{Maximizing throughput equals to minimizing travel time under certain conditions and minimizing travel time is the final goal for most traffic signal control problems.}. However, the solution of MP is greedy, which leads to locally optimal solutions. 
+
+Our proposed solution is based on RL but theoretically grounded by MP method. The connection between RL and MP is that both approaches can essentially be framed as an optimization problem. In RL, long term reward is the objective for optimization and the solution is derived from trial-and-error search. In MP, the objective is to minimize pressure and the solution is derived from a greedy algorithm. Intuitively, if we set our reward function the same as the objective of MP, we can achieve the same result as MP. We first prove that under the assumption of no physical queue expansion, both our method and MP are maximizing throughput of the network. We further show that our method can relax the assumption on queue expansion and the conclusion still holds.
+
+To further address the challenge on state design, we describe the system dynamics using the state features based on MP. MP provides evolution equations to formulate the state transition of the traffic as a Markov chain~\cite{MP13book}. In RL, the Markov decision process formally describes the dynamics of an environment. By including the variables from the evolution equation into state definition in RL, the state is a sufficient statistic for the system dynamics.
+
+We conduct comprehensive experiments using both synthetic data and real data. We test our method in different traffic flow and network structure scenarios. We demonstrate the power of RL methods over traditional transportation approaches as RL optimizes the objective through trial and error. Our method also consistently outperforms state-of-the-art RL methods, which shows that theoretically supported reward design is necessary and the concise state design leads to an efficient learning process. We further discuss several interesting policies learned by our method to show that our method can achieve coordination along arterial.
+\vspace{-3mm}
+
+\section{Related Work}
+\subparagraph{\textbf{Individual Traffic Signal Control.}}
+Individual traffic signal control has been investigated extensively in the field of transportation, which tries to optimize the travel time or delay of vehicles~\cite{Gart83,Henr84,Boil06,SeHe97,Liang18}, assuming that vehicles are arriving and moving in a specific pattern. Recently, reinforcement learning based methods attempt to address this problem by directly learning from the data~\cite{Wier00,MaDH16}. Earlier work using tabular Q-learning~\cite{APK03,ElAb10} can only deal with discrete state representations. Recent work using deep RL~\cite{liLW16,VaOl16,wei2018intellilight,ZXZF+19,MSCH17,Casa17PG} can cope with more complex continuous state representation. ~\cite{ZZXW+19} noticed that it is not always true that the more complex the state definitions are, the better the performance will be. In~\cite{ZZXW+19}, they also investigated the proper reward design grounded by the individual intersection control method in transportation field. In this chapter, we are focusing on the multi-intersection scenario.
+
+\subparagraph{\textbf{Conventional Multi-intersection Traffic Signal Control.}}
+In conventional multi-intersection control, coordination can be achieved by setting a fixed offset (i.e., the time interval between the beginnings of green lights) among all intersections along an arterial~\cite{urbanik2015signal}. In fact, it is not an easy task, given traffic of opposite directions usually cannot be facilitated simultaneously. To solve this problem, some optimization-based methods~\cite{robertson1969transyt,little1981maxband} are developed to minimize vehicle travel time and/or the number of stops at multiple intersections. Instead of optimizing offsets, max pressure~\cite{MP13,MP13book} aims to maximize the throughput of the network so as to minimizing the travel time. However, these approaches still rely on assumptions to simplify the traffic condition and do not guarantee optimal results in the real world.
+
+\subparagraph{\textbf{RL-based Multi-intersection Traffic Signal Control.}}
+Since recent advances in RL improve the performance on isolated traffic signal control~\cite{wei2018intellilight,ZZXW+19}, efforts have been made to design strategies that control multiple intersections. \textit{One way} is to consider jointly modeling the action between learning agents with centralized optimization~\cite{KWBV08,VaOl16}. Since these methods~\cite{KWBV08,VaOl16} need to negotiate between the agents in the whole network, they are computationally expensive. \textit{Another way} is to use decentralized RL agents to control the traffic signals in the multi-intersection system~\cite{ElAA13,ALUK10,da2006adaptive}. Since each agent makes its own decision based on the information from itself and neighboring intersections without centralized decision, decentralized methods may be more scalable and practicable. By plugging new intersection controllers into the system, the decentralized systems are easy to scale. Our proposed method also follows this direction. 
+
+We notice the recent trend to vary the definition of state and reward in RL for traffic signal control. Readers interested in the detailed comparison of the state and reward definitions can refer to~\cite{hua19survey}. We are the first RL method that is theoretically grounded by traditional transportation methods to coordinate the traffic signals along an arterial.
+
+
+% !TEX root = main.tex
 \section{Preliminaries}
 \label{sec:preliminary}
 
@@ -48,10 +107,10 @@ In our problem, each intersection is controlled by an RL agent.  At each time st
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.40\textwidth]{figures/phase.png}
+    \includegraphics[width=0.8\textwidth]{figures/phase.png}
     \caption{Phase and traffic movements in traffic signal control problem. Phase \#2 is set in the example.}
     \label{fig:preliminary}
-    \vspace{-2mm}
+    % \vspace{-2mm}
 \end{figure}
 
 \vspace{-2mm}
@@ -63,8 +122,8 @@ In our problem, each intersection is controlled by an RL agent.  At each time st
 
 First, we introduce the state, action and reward design for an agent that controls an intersection.
 \begin{itemize}[wide,noitemsep,topsep=0pt]
-    \item \textbf{State (Observation)}. Our state is defined for one intersection, which equals to the definition of observation in multi-agent RL. It includes the current phase $p$, the number of vehicles on each outgoing lane $x(m)$ ($m\in L_{out}$), and the number of vehicles on each segment of every incoming lane $x(l)_k$ ($l\in L_{in}$, $k=1\dots K$). In this paper, each lane is evenly divided into 3 segments $(K=3)$, and we denote the segment on lane $l$ nearest to the intersection as the first segment $x(l)_1$.
-    \item \textbf{Action}. At time $t$, each agent chooses a phase $p$ as its action $a_t$ from action set $\pmb{A}$, indicating the traffic signal should be set to phase $p$. In this paper, each agent has four permissible actions, correspondingly four phases in Figure~\ref{fig:preliminary}. Each action candidate $a_{i}$ is represented as a one-hot vector. Note that in the real world the signal phases may organize in a cyclic way, while our action makes the traffic signal plan more flexible. Also, there may be different number of phases in the real world and four phases is not a must.
+    \item \textbf{State (Observation)}. Our state is defined for one intersection, which equals to the definition of observation in multi-agent RL. It includes the current phase $p$, the number of vehicles on each outgoing lane $x(m)$ ($m\in L_{out}$), and the number of vehicles on each segment of every incoming lane $x(l)_k$ ($l\in L_{in}$, $k=1\dots K$). In this chapter, each lane is evenly divided into 3 segments $(K=3)$, and we denote the segment on lane $l$ nearest to the intersection as the first segment $x(l)_1$.
+    \item \textbf{Action}. At time $t$, each agent chooses a phase $p$ as its action $a_t$ from action set $\pmb{A}$, indicating the traffic signal should be set to phase $p$. In this chapter, each agent has four permissible actions, correspondingly four phases in Figure~\ref{fig:preliminary}. Each action candidate $a_{i}$ is represented as a one-hot vector. Note that in the real world the signal phases may organize in a cyclic way, while our action makes the traffic signal plan more flexible. Also, there may be different number of phases in the real world and four phases is not a must.
     \item \textbf{Reward}. We define the reward $r_i$ as
         \begin{equation}
             \label{eq:reward-detail}
@@ -106,7 +165,7 @@ First, we introduce the state, action and reward design for an agent that contro
 
 % The Q-value function is estimated using a function approximator with weight vector $\theta: Q_i(o, a; \theta)$. 
 
-In this paper, we adopt Deep Q-Network (DQN) as function approximator to estimate the Q-value function. To stabilize the training process, we maintain an experience replay memory as described in~\cite{MKSR+15} by adding the new data samples in and removing the old samples occasionally. Periodically, the agent will take samples from the memory and use them to update the network.
+In this chapter, we adopt Deep Q-Network (DQN) as function approximator to estimate the Q-value function. To stabilize the training process, we maintain an experience replay memory as described in~\cite{MKSR+15} by adding the new data samples in and removing the old samples occasionally. Periodically, the agent will take samples from the memory and use them to update the network.
 % \begin{figure}[h!]
 % \includegraphics[width = 250pt]{figures/qnetwork.png}
 % \caption{Deep Q-network}
@@ -152,7 +211,8 @@ To theoretically support the efficacy of our proposed method, we justify our rew
 
 Consider the arterial scenario described in Example~\ref{eg:inter}.
 \begin{figure}[h!]
-\includegraphics[width = 3.3in]{figures/SFM.pdf}
+\centering
+\includegraphics[width = 5.0in]{figures/SFM.pdf}
 \caption{The transition of traffic movements.}
 \label{fig:SFM}
 \vspace{-3mm}
@@ -253,7 +313,7 @@ At each period $t$, the agent selects the action with maximum pressure at every 
 \tilde{A}^*(X) = \arg\max_{\tilde{A}\in \pmb{A}}\theta(\tilde{A}, X)$, where the pressure of $\tilde{A}$ is defined as
 $$\theta(\tilde{A},X) = \sum_{(l,m):a(l,m)=1} \tilde{w}(l,m),$$
 and $\tilde{w}(l,m) = x(l)- x(m)$ is the pressure of each movement. 
-In this paper, we use the tilde symbol for max-pressure policy, i.e., $\tilde{A}$, in order to differentiate it from a RL policy.
+In this chapter, we use the tilde symbol for max-pressure policy, i.e., $\tilde{A}$, in order to differentiate it from a RL policy.
 % \begin{equation}
 % \label{eq:mp-pressure}
 % \theta(\tilde{A},X) = \sum_{l,m:a(l,m)=1}c(l,m)\cdot \tilde{w}(l,m)(X)
@@ -297,7 +357,7 @@ The difference between the pressure definition in RL reward and max-pressure is 
     %     %   \begin{tabular}[c]{@{}c@{}}(b) Qingdao Road in Jinan, China:\\ a 3-intersection arterial with bidirectional traffic \\on both the arterial and the side streets.\end{tabular}&
     %     %   \begin{tabular}[c]{@{}c@{}}(c) 8-th, 9-th, 10-th and 11-th Avenue in New York City, USA:\\ 16-intersection arterials with uni-directional traffic \\on both the arterial and the side streets.\end{tabular}\\
     %     %   \end{tabular}
-    \includegraphics[width=0.70\textwidth]{figures/case_arterial.png}
+    \includegraphics[width=1.0\textwidth]{figures/case_arterial.png}
      \caption{Real-world arterial network for the experiment.}
     \label{fig:real-intersection}
 \end{figure*}
@@ -369,7 +429,7 @@ The free-flow speed on the road segments is set to 40 kilometers/hour. Vehicles 
 
 \begin{table}[h!]
 \begin{center}
-\vspace{-2mm}
+% \vspace{-2mm}
 \caption{Configurations for synthetic traffic data}
 \label{tab:synthetic-table}
 \begin{tabular}{lccc}
@@ -380,11 +440,12 @@ Config        & \begin{tabular}[c]{@{}c@{}}Demand \\ pattern \end{tabular}  & \b
 3. Heavy-Flat & Flat           & \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Arterial: 1400\\ Side-street : 420 \end{tabular}}  &    \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}} (Heavy) \end{tabular}}  \\ \cline{1-2}
 4. Heavy-Peak & Peak           &                                                                                               &  \\ \hline
 \end{tabular}
-\vspace{-2mm}
+% \vspace{-2mm}
 \end{center}
 \end{table}
 
 \begin{table}[t]
+\begin{center}
 \caption{Data statistics of real-world traffic dataset}
 \label{tab:real-table}
 \begin{tabular}{cccccc}
@@ -399,7 +460,8 @@ Config        & \begin{tabular}[c]{@{}c@{}}Demand \\ pattern \end{tabular}  & \b
 11-th Ave., NYC     & 4030.79       & 24.08       & 2472       & 4536    & 16    \\
 \bottomrule
 \end{tabular}
-\vspace{-2mm}
+% \vspace{-2mm}
+\end{center}
 \end{table}
 
 \subsubsection{Evaluation metric}
@@ -428,21 +490,42 @@ We compare our model with the following two categories of methods: transportatio
 \item \textbf{\NIPS} is a coordinated reinforcement learning approach for multi-intersection control~\cite{VaOl16}. Specifically, the coordination is to design a coordination graph and to learn the joint local Q-function on two adjacent intersections directly.
 \end{itemize}
 
+\begin{table*}[tp!]
+\caption{Performance comparison on synthetic data between all the methods in the arterial with 6 intersections w.r.t. average travel time (the lower the better). Top-down: conventional transportation methods, learning methods, and our proposed method. }
+\label{tab:RQ1-result}
+\centering
+\begin{tabular}{p{0.2\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}}
+\toprule
+& \multicolumn{4}{c}{Synthetic traffic }  \\ 
+& LightFlat & LightPeak  & HeavyFlat& HeavyPeak \\ \midrule
+\FT             &\multicolumn{1}{c}{  93.29   		}&\multicolumn{1}{c}{   109.50        }&\multicolumn{1}{c}{    325.48       }&\multicolumn{1}{c}{   246.25         } \\ 
+\Greenwave      &\multicolumn{1}{c}{  98.39    	}&\multicolumn{1}{c}{  124.09         }&\multicolumn{1}{c}{   263.36        }&\multicolumn{1}{c}{   286.85         }\\
+
+\Maxpressure    &\multicolumn{1}{c}{  74.30       	}&\multicolumn{1}{c}{  82.37          }&\multicolumn{1}{c}{   262.26        }&\multicolumn{1}{c}{   225.60         }\\
+ \midrule
+\NIPS           &\multicolumn{1}{c}{ 123.02   	}&\multicolumn{1}{c}{  115.85      }&\multicolumn{1}{c}{  525.64         }&\multicolumn{1}{c}{  757.73          }\\ 
+\LIT      &\multicolumn{1}{c}{  65.07       	}&\multicolumn{1}{c}{  66.77      	  }&\multicolumn{1}{c}{   233.17        }&\multicolumn{1}{c}{   258.33         }\\
+ \midrule
+\textbf{\PressLight}     &\multicolumn{1}{c}{\textbf{59.96}}	&\multicolumn{1}{c}{  \textbf{61.34}} &\multicolumn{1}{c}{ \textbf{160.48} }&\multicolumn{1}{c}{  \textbf{184.51} }\\ 
+
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \begin{table*}[tp!]
-\caption{Performance comparison between all the methods in the arterial with 6 intersections w.r.t. average travel time (the lower the better). Top-down: conventional transportation methods, learning methods, and our proposed method. }
-\label{tab:RQ1-result}
-\center
-\begin{tabular}{p{0.1\textwidth}p{0.06\textwidth}p{0.07\textwidth}p{0.07\textwidth}p{0.08\textwidth}|p{0.09\textwidth}p{0.09\textwidth}p{0.05\textwidth}p{0.06\textwidth}p{0.06\textwidth}p{0.06\textwidth}p{0.06\textwidth}}
+\caption{Performance comparison on real-world data between all the methods in the arterial with 6 intersections w.r.t. average travel time (the lower the better). Top-down: conventional transportation methods, learning methods, and our proposed method. }
+\label{tab:RQ1-result-2}
+\centering
+\begin{tabular}{p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}}
 \toprule
-& \multicolumn{4}{c|}{Synthetic traffic } & \multicolumn{6}{c}{Real-world traffic}  \\ 
-& LightFlat & LightPeak  & HeavyFlat& HeavyPeak  & \begin{tabular}[c]{@{}c@{}}Qingdao Rd.,\\ Jinan\end{tabular} & \begin{tabular}[c]{@{}c@{}}Beaver Ave.,\\ State College\end{tabular}& \begin{tabular}[c]{@{}c@{}}8th Ave.,\\ NYC\end{tabular} &\begin{tabular}[c]{@{}c@{}}9th Ave.,\\ NYC\end{tabular}&\begin{tabular}[c]{@{}c@{}}10th Ave.,\\ NYC\end{tabular}&\begin{tabular}[c]{@{}c@{}}11th Ave.,\\ NYC\end{tabular}  \\ \midrule
-\FT             &\multicolumn{1}{c}{  93.29   		}&\multicolumn{1}{c}{   109.50        }&\multicolumn{1}{c}{    325.48       }&\multicolumn{1}{c|}{   246.25         }&\multicolumn{1}{c}{  317.40         }&\multicolumn{1}{c}{    336.29                   	}&\multicolumn{1}{c}{ 432.60  }&\multicolumn{1}{c}{	469.54}&\multicolumn{1}{c}{347.05   	}   &\multicolumn{1}{c}{  368.84} \\ 
-\Greenwave      &\multicolumn{1}{c}{  98.39    	}&\multicolumn{1}{c}{  124.09         }&\multicolumn{1}{c}{   263.36        }&\multicolumn{1}{c|}{   286.85         }&\multicolumn{1}{c}{   370.30        }&\multicolumn{1}{c}{   332.06                		}&\multicolumn{1}{c}{ 451.98  }&\multicolumn{1}{c}{	502.30}&\multicolumn{1}{c}{317.02   	}&\multicolumn{1}{c}{  314.08}\\ 
-\Maxpressure    &\multicolumn{1}{c}{  74.30       	}&\multicolumn{1}{c}{  82.37          }&\multicolumn{1}{c}{   262.26        }&\multicolumn{1}{c|}{   225.60         }&\multicolumn{1}{c}{ 567.06          }&\multicolumn{1}{c}{     222.90               	 	}&\multicolumn{1}{c}{ 412.58  }&\multicolumn{1}{c}{	370.61}&\multicolumn{1}{c}{392.77   	}&\multicolumn{1}{c}{  224.54}\\ \midrule
-\NIPS           &\multicolumn{1}{c}{ 123.02   	}&\multicolumn{1}{c}{  115.85      }&\multicolumn{1}{c}{  525.64         }&\multicolumn{1}{c|}{  757.73          }&\multicolumn{1}{c}{ 238.19        }&\multicolumn{1}{c}{  455.42        	  		 	}&\multicolumn{1}{c}{704.98}&\multicolumn{1}{c}{669.69			  }&\multicolumn{1}{c}{676.19	}&\multicolumn{1}{c}{548.34}\\ 
-\LIT      &\multicolumn{1}{c}{  65.07       	}&\multicolumn{1}{c}{  66.77      	  }&\multicolumn{1}{c}{   233.17        }&\multicolumn{1}{c|}{   258.33         }&\multicolumn{1}{c}{     58.18       }&\multicolumn{1}{c}{    338.52   		  		 	}&\multicolumn{1}{c}{ 471.30  }&\multicolumn{1}{c}{	726.04}&\multicolumn{1}{c}{309.95   	}&\multicolumn{1}{c}{  340.40}\\ \midrule
-\textbf{\PressLight}     &\multicolumn{1}{c}{\textbf{59.96}}	&\multicolumn{1}{c}{  \textbf{61.34}} &\multicolumn{1}{c}{ \textbf{160.48} }&\multicolumn{1}{c|}{  \textbf{184.51} }&\multicolumn{1}{c}{ \textbf{54.87}   }&\multicolumn{1}{c}{  \textbf{92.00}        		}&\multicolumn{1}{c}{ \textbf{223.36 }} &\multicolumn{1}{c}{	\textbf{149.01}}&\multicolumn{1}{c}{\textbf{161.21	} 	}&\multicolumn{1}{c}{  \textbf{140.82}}\\ 
+& \multicolumn{6}{c}{Real-world traffic}  \\ 
+& \begin{tabular}[c]{@{}c@{}}Qingdao Rd.,\\ Jinan\end{tabular} & \begin{tabular}[c]{@{}c@{}}Beaver Ave.,\\ State College\end{tabular}& \begin{tabular}[c]{@{}c@{}}8th Ave.,\\ NYC\end{tabular} &\begin{tabular}[c]{@{}c@{}}9th Ave.,\\ NYC\end{tabular}&\begin{tabular}[c]{@{}c@{}}10th Ave.,\\ NYC\end{tabular}&\begin{tabular}[c]{@{}c@{}}11th Ave.,\\ NYC\end{tabular}  \\ \midrule
+\FT             &\multicolumn{1}{c}{  317.40         }&\multicolumn{1}{c}{    336.29                   	}&\multicolumn{1}{c}{ 432.60  }&\multicolumn{1}{c}{	469.54}&\multicolumn{1}{c}{347.05   	}   &\multicolumn{1}{c}{  368.84} \\ 
+\Greenwave      &\multicolumn{1}{c}{   370.30        }&\multicolumn{1}{c}{   332.06                		}&\multicolumn{1}{c}{ 451.98  }&\multicolumn{1}{c}{	502.30}&\multicolumn{1}{c}{317.02   	}&\multicolumn{1}{c}{  314.08}\\ 
+\Maxpressure    &\multicolumn{1}{c}{ 567.06          }&\multicolumn{1}{c}{     222.90               	 	}&\multicolumn{1}{c}{ 412.58  }&\multicolumn{1}{c}{	370.61}&\multicolumn{1}{c}{392.77   	}&\multicolumn{1}{c}{  224.54}\\ \midrule
+\NIPS          &\multicolumn{1}{c}{ 238.19        }&\multicolumn{1}{c}{  455.42        	  		 	}&\multicolumn{1}{c}{704.98}&\multicolumn{1}{c}{669.69			  }&\multicolumn{1}{c}{676.19	}&\multicolumn{1}{c}{548.34}\\ 
+\LIT      &\multicolumn{1}{c}{     58.18       }&\multicolumn{1}{c}{    338.52   		  		 	}&\multicolumn{1}{c}{ 471.30  }&\multicolumn{1}{c}{	726.04}&\multicolumn{1}{c}{309.95   	}&\multicolumn{1}{c}{  340.40}\\ \midrule
+\textbf{\PressLight}     &\multicolumn{1}{c}{ \textbf{54.87}   }&\multicolumn{1}{c}{  \textbf{92.00}        		}&\multicolumn{1}{c}{ \textbf{223.36 }} &\multicolumn{1}{c}{	\textbf{149.01}}&\multicolumn{1}{c}{\textbf{161.21	} 	}&\multicolumn{1}{c}{  \textbf{140.82}}\\ 
 % Improvements &   7.85\%          &  8.13\%           &       5.69\%         &      31.17\%       &   28.58\%          &    58.73\%             \\ 
 \bottomrule
 \end{tabular}
@@ -466,8 +549,10 @@ We have the following findings:
 \paragraph{Effects of variants of our proposed method} We consider several variations of our model as follows.
 
 \begin{table}[t!]
+\centering
 \caption{Detailed comparison of our proposed state and reward design and their effects w.r.t. average travel time (lower the better) under synthetic traffic data.}
 \label{tab:variants-result}
+% \centering
 \begin{tabular}{ccccc}
 \toprule
            & \HeavyFlat & \HeavyPeak \\ \midrule
@@ -476,7 +561,7 @@ We have the following findings:
 \SNDeeplight    & 200.28      &  196.34     \\ 
 \textbf{\PressLight} & \textbf{160.48} &  \textbf{184.51}     \\ \bottomrule
 \end{tabular}
-\vspace{-3mm}
+% \vspace{-3mm}
 \end{table}
 
 \begin{itemize}[wide,noitemsep,topsep=0pt]
@@ -511,9 +596,11 @@ Table~\ref{tab:variants-result} shows the performance of variants of our method:
 Figure~\ref{fig:convergence} illustrates the convergence curve of our agents learning process w.r.t. the average reward and the average pressure of each round. We can see that the travel time is closely correlated with pressure.
 
 \begin{figure}[t]
+\begin{center}
   \begin{tabular}{c}
-   \includegraphics[width=0.37\textwidth]{figures/converg.png} \\
+   \includegraphics[width=1.0\textwidth]{figures/converg.png} \\
    \end{tabular}
+   \end{center}
      \caption{Convergence curve of average duration and our reward design (pressure). Pressure shows the same convergence trend with travel time.}
     \label{fig:convergence}
 \end{figure}
@@ -526,18 +613,20 @@ We employ our model to two heterogeneous arterials, as is shown in Figure~\ref{f
 
 
 \begin{figure}[t!]
-   \includegraphics[width=0.3\textwidth]{figures/heter_results.png} 
+\centering
+   \includegraphics[width=0.8\textwidth]{figures/heter_results.png} 
      \caption{Average travel time of our method on heterogeneous intersections. (a) Different number of legs. (b)  Different length of lanes. (c) Experiment results.}
     \label{fig:heter_inter}
-    \vspace{-2mm}
+    % \vspace{-2mm}
 \end{figure}
-\vspace{-2mm}
+% \vspace{-2mm}
 
 \begin{figure}[t!]
-   \includegraphics[width=0.40\textwidth]{figures/gw.png} 
+\centering
+   \includegraphics[width=0.9\textwidth]{figures/gw.png} 
      \caption{Performance comparison under uniform unidirectional traffic, where the optimal solution is known (\Greenwave). Only \PressLight can achieve the optimal.}
     \label{fig:optimal}
-    \vspace{-3mm}
+    % \vspace{-3mm}
 \end{figure}
 
 \subsubsection{Arterials with a different number of intersections and network}
@@ -546,13 +635,23 @@ We employ our model to two heterogeneous arterials, as is shown in Figure~\ref{f
 \centering
 \caption{Average travel time of different methods under arterials with a different number of intersections and network.}
 \label{tab:more-intersection}
-\begin{tabular}{ccccccccc}
+\begin{tabular*}{\textwidth}{ccccccc}
 \toprule
-           & \multicolumn{2}{c}{6-intersection arterial} & \multicolumn{2}{c}{10-intersection arterial} & \multicolumn{2}{c}{20-intersection arterial} & \multicolumn{2}{c}{Grid network} \\
-           & \HeavyFlat  & \HeavyPeak & \HeavyFlat  & \HeavyPeak  & \HeavyFlat   & \HeavyPeak  & \HeavyFlat  & \HeavyPeak \\ \midrule
-\Maxpressure        &       262.26        &  225.60  &     129.63         &    129.63     &310.95 &    271.39          &   539.67           &     485.03        \\
-\LIT        & 233.17  & 258.33     & 157.84 & 200.96 & 246.88 &  202.30 & 283.21  &    332.53      \\
-\PressLight(ours) &  \textbf{160.48}  &  \textbf{184.51}   & \textbf{88.88}   &   \textbf{79.61}  & \textbf{155.84} & \textbf{188.92} &  \textbf{251.02} &  \textbf{262.46}           \\  \bottomrule
+           & \multicolumn{2}{c}{6-intersection arterial} & \multicolumn{2}{c}{10-intersection arterial} & \multicolumn{2}{c}{20-intersection arterial}  \\
+           & \HeavyFlat  & \HeavyPeak & \HeavyFlat  & \HeavyPeak  & \HeavyFlat   & \HeavyPeak   \\ \midrule
+\Maxpressure        &       262.26        &  225.60  &     129.63         &    129.63     &310.95 &    271.39                \\
+\LIT        & 233.17  & 258.33     & 157.84 & 200.96 & 246.88 &  202.30     \\
+\PressLight(ours) &  \textbf{160.48}  &  \textbf{184.51}   & \textbf{88.88}   &   \textbf{79.61}  & \textbf{155.84} & \textbf{188.92}           \\  \bottomrule
+\end{tabular*}\\
+\vfill
+\vspace{1cm}
+\begin{tabular}{ccc}
+\toprule
+           &  \multicolumn{2}{c}{Grid network} \\
+           &  \HeavyFlat  & \HeavyPeak \\ \midrule
+\Maxpressure              &   539.67           &     485.03        \\
+\LIT         & 283.21  &    332.53      \\
+\PressLight(ours)   \textbf{251.02} &  \textbf{262.46}           \\  \bottomrule
 \end{tabular}
 \end{table*}
 
@@ -589,20 +688,20 @@ In this section, we perform experiments on the arterials with six homogeneous in
 
 \begin{figure}[t!]
   \centering
-	\includegraphics[width=0.37\textwidth]{figures/offset.png}
+	\includegraphics[width=0.8\textwidth]{figures/offset.png}
      \caption{Offsets between intersections learnt by RL agents under uni-directional uniform traffic (700 vehicles/hour/lane on arterial) }   
     \label{fig:case-study}
-    \vspace{-3mm}
+    % \vspace{-3mm}
 \end{figure}
 
 \begin{figure}[t!]
   \centering
   \begin{tabular}{c}
-   \includegraphics[width=0.35\textwidth]{figures/case_study_1.png} \\
+   \includegraphics[width=0.8\textwidth]{figures/case_study_1.png} \\
    \end{tabular}
      \caption{Space-time diagram with signal timing plan to illustrate the learned coordination strategy from real-world data on the arterial of Qingdao Road in the morning (around 8:30 a.m.) on August 6th.}
     \label{fig:case-study-real}
-    \vspace{-3mm}
+    % \vspace{-3mm}
 \end{figure}
 
 \paragraph{Performance comparison}
@@ -634,13 +733,13 @@ We have several observations:
 In this section, we make observations on the policies we learned from the real data for the arterial of Qingdao Road ($East$ and $West$ direction) during the morning peak hour (around 8:30 a.m.) on August 6th.  In Figure~\ref{fig:case-study-real}, a time-space diagram is drawn with time on the horizontal axis and distance (from a reference point, here we use the westernmost point on the arterial as the reference point) on the vertical axis. Most of the blue and orange lines are straight, indicating most vehicles on the arterial are not stopped by red lights, which means our method can automatically form a green wave.
 
 \section{Conclusion}
-In this paper, we propose a novel RL method for multi-intersection traffic signal control on the arterials. We conduct extensive experiments using both synthetic and real data and demonstrate the superior performance of our method over the state-of-the-art. Specifically, we draw a connection on the design between reinforcement learning with conventional transportation control methods. It is also the first time the individual RL model automatically achieves coordination along arterial without any prior knowledge. 
+In this chapter, we propose a novel RL method for multi-intersection traffic signal control on the arterials. We conduct extensive experiments using both synthetic and real data and demonstrate the superior performance of our method over the state-of-the-art. Specifically, we draw a connection on the design between reinforcement learning with conventional transportation control methods. It is also the first time the individual RL model automatically achieves coordination along arterial without any prior knowledge. 
  
  We acknowledge the limitations of our model and would like to point out several future directions. In our experiment, we did not model the behavior of vehicles. The behavior of vehicles (e.g., routing) in the real-world may change dynamically in response to traffic lights. Another direction can be reducing the cost of learning. Since RL is learning from trial-and-error, deploying an online updated RL model in real-world could be dangerous and costly.
 
 
 % \begin{acks}
-% The work was supported in part by NSF awards \#1652525, \#1618448, and \#1639150. The views and conclusions contained in this paper are
+% The work was supported in part by NSF awards \#1652525, \#1618448, and \#1639150. The views and conclusions contained in this chapter are
 % those of the authors and should not be interpreted as representing
 % any funding agencies.
 % \end{acks}
